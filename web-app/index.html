@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Business Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #343a40;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .summary-card {
+            background: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .summary-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .quick-actions {
+            background: white;
+            margin: 0 15px 15px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .quick-actions-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .action-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .action-button:hover {
+            background: #0056b3;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .message {
+            max-width: 80%;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+
+        .ai-message {
+            background: white;
+            border: 1px solid #e9ecef;
+            color: #343a40;
+        }
+
+        .message-text {
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .input-container {
+            background: white;
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .text-input {
+            flex: 1;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            padding: 12px 15px;
+            font-size: 16px;
+            max-height: 100px;
+            resize: none;
+        }
+
+        .send-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 10px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AI Business Assistant</h1>
+        <button onclick="refreshData()" style="background: none; border: none; font-size: 24px; cursor: pointer;">🔄</button>
+    </div>
+
+    <div class="summary-card">
+        <div class="summary-title">📊 Business Overview</div>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-number" id="total-customers">-</div>
+                <div class="summary-label">Customers</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number" id="total-orders">-</div>
+                <div class="summary-label">Tickets</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number" id="total-revenue">-</div>
+                <div class="summary-label">Revenue</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number" id="total-products">-</div>
+                <div class="summary-label">Items</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <div class="quick-actions-title">⚡ Quick Actions:</div>
+        <div class="action-buttons">
+            <button class="action-button" onclick="askQuestion('Show customer summary')">👥 Customers</button>
+            <button class="action-button" onclick="askQuestion('What is the total revenue?')">💰 Revenue</button>
+            <button class="action-button" onclick="askQuestion('Show top products')">👔 Items</button>
+            <button class="action-button" onclick="askQuestion('Order status distribution')">🎫 Tickets</button>
+        </div>
+    </div>
+
+    <div class="messages-container" id="messages-container">
+        <div class="message ai-message">
+            <div class="message-text">Hello! I'm your AI dry cleaning business assistant. I can help you analyze your customer data, tickets, items, and revenue. Try asking me about customers, tickets, products, or sales!</div>
+            <div class="timestamp">Just now</div>
+        </div>
+    </div>
+
+    <div class="input-container">
+        <textarea 
+            class="text-input" 
+            id="message-input" 
+            placeholder="Ask me about your dry cleaning business data..."
+            rows="1"
+            onkeypress="handleKeyPress(event)"
+        ></textarea>
+        <button class="send-button" onclick="sendMessage()">📤</button>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        let isLoading = false;
+
+        // Load data summary on page load
+        window.onload = function() {
+            loadDataSummary();
+        };
+
+        async function loadDataSummary() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/data/summary`);
+                const data = await response.json();
+                
+                document.getElementById('total-customers').textContent = data.total_customers || 0;
+                document.getElementById('total-orders').textContent = data.total_orders || 0;
+                document.getElementById('total-revenue').textContent = `$${data.total_revenue || 0}`;
+                document.getElementById('total-products').textContent = data.total_products || 0;
+            } catch (error) {
+                console.error('Error loading data summary:', error);
+                showError('Failed to load business data. Make sure the backend server is running.');
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message || isLoading) return;
+
+            // Add user message
+            addMessage(message, true);
+            input.value = '';
+            
+            // Show loading
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: message })
+                });
+
+                const data = await response.json();
+                
+                // Hide loading
+                hideLoading();
+                
+                // Add AI response
+                const responseText = formatAIResponse(data.result);
+                addMessage(responseText, false);
+                
+            } catch (error) {
+                hideLoading();
+                addMessage('Sorry, I encountered an error processing your request. Please try again.', false);
+                console.error('Error:', error);
+            }
+        }
+
+        function addMessage(text, isUser) {
+            const container = document.getElementById('messages-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-text">${text}</div>
+                <div class="timestamp">${new Date().toLocaleTimeString()}</div>
+            `;
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showLoading() {
+            isLoading = true;
+            const container = document.getElementById('messages-container');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.id = 'loading-message';
+            loadingDiv.textContent = 'AI is thinking...';
+            container.appendChild(loadingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideLoading() {
+            isLoading = false;
+            const loadingDiv = document.getElementById('loading-message');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+
+        function formatAIResponse(data) {
+            if (typeof data === 'string') return data;
+            
+            if (data.message) return data.message;
+            
+            if (data.total_customers) {
+                return `Total customers: ${data.total_customers}`;
+            }
+            
+            if (data.total_orders) {
+                return `Total orders: ${data.total_orders}`;
+            }
+            
+            if (data.total_revenue) {
+                return `Total revenue: $${data.total_revenue}`;
+            }
+            
+            if (data.customers && Array.isArray(data.customers)) {
+                const customerList = data.customers.slice(0, 3)
+                    .map(c => `${c.Customer_Name} (${c.Customer_Type}) - ${c.Email}`)
+                    .join('\n');
+                return `Found ${data.customers.length} customers. Here are some:\n\n${customerList}${data.customers.length > 3 ? '\n...and more' : ''}`;
+            }
+            
+            if (data.products && Array.isArray(data.products)) {
+                const productList = data.products.slice(0, 3)
+                    .map(p => `${p.Product_Name} - $${p.Unit_Price}`)
+                    .join('\n');
+                return `Found ${data.products.length} products. Here are some:\n\n${productList}${data.products.length > 3 ? '\n...and more' : ''}`;
+            }
+            
+            if (data.top_products) {
+                const topProducts = Object.entries(data.top_products)
+                    .map(([product, count]) => `${product}: ${count} sales`)
+                    .join('\n');
+                return `Top products by sales:\n${topProducts}`;
+            }
+            
+            if (data.order_status_distribution) {
+                const statuses = Object.entries(data.order_status_distribution)
+                    .map(([status, count]) => `${status}: ${count}`)
+                    .join('\n');
+                return `Order status distribution:\n${statuses}`;
+            }
+            
+            return JSON.stringify(data, null, 2);
+        }
+
+        function askQuestion(question) {
+            document.getElementById('message-input').value = question;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function refreshData() {
+            loadDataSummary();
+            addMessage('Data refreshed!', false);
+        }
+
+        function showError(message) {
+            const container = document.getElementById('messages-container');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            container.appendChild(errorDiv);
+        }
+    </script>
+</body>
+</html>
